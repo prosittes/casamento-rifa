@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Natal Premiado do Casamento Bruna & Jhonatan</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --gold: #d4af37;
+      --gold-soft: #f5e6b3;
+      --bg-card: #ffffff;
+      --bg-page: #f7f7f7;
+      --text-main: #333333;
+      --text-muted: #666666;
+      --border-soft: #e0e0e0;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: var(--bg-page);
+      color: var(--text-main);
+      padding: 16px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .page {
+      max-width: 960px;
+      width: 100%;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border-radius: 12px;
+      border: 1px solid var(--border-soft);
+      padding: 20px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+      margin-bottom: 16px;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      border-bottom: 1px solid var(--border-soft);
+      padding-bottom: 12px;
+      margin-bottom: 12px;
+    }
+
+    .foto-noivos {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      border: 2px solid var(--gold);
+      object-fit: cover;     /* corta a foto certinho dentro do círculo */
+    }
+
+    .header-text h1 {
+      margin: 0;
+      font-size: 20px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--text-main);
+    }
+
+    .header-text p {
+      margin: 4px 0 0 0;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .highlight-quote {
+      font-weight: bold;
+      color: var(--gold);
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .info-line {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin: 2px 0;
+    }
+
+    h2 {
+      font-size: 16px;
+      margin: 8px 0;
+      color: var(--text-main);
+    }
+
+    ol {
+      padding-left: 18px;
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    table {
+      border-collapse: collapse;
+      margin-top: 8px;
+      width: 100%;
+      font-size: 14px;
+    }
+    th, td {
+      border: 1px solid var(--border-soft);
+      padding: 6px 8px;
+      text-align: left;
+    }
+    th {
+      background: #fafafa;
+    }
+
+    .section-title {
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+
+    .legenda {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    .legenda span {
+      display: inline-block;
+      margin-right: 12px;
+    }
+    .legenda-box {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      margin-right: 4px;
+      border: 1px solid var(--border-soft);
+      vertical-align: middle;
+    }
+    .box-disponivel { background-color: #e9ffe9; }
+    .box-reservado { background-color: #ffe9c2; }
+    .box-pago { background-color: #ffcccc; }
+
+    /* Blocos de números */
+    #blocos-container {
+      margin-top: 10px;
+    }
+    .bloco {
+      border: 1px solid var(--border-soft);
+      border-radius: 10px;
+      margin-bottom: 10px;
+      overflow: hidden;
+      background: #fcfcfc;
+    }
+    .bloco-header {
+      background: linear-gradient(to right, var(--gold-soft), #fff);
+      padding: 8px 12px;
+      cursor: pointer;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 14px;
+      color: var(--text-main);
+    }
+    .bloco-header span.toggle {
+      font-size: 18px;
+      margin-left: 8px;
+      color: var(--gold);
+    }
+    .bloco-corpo {
+      padding: 8px 10px;
+      display: none;
+    }
+
+    .numero-btn {
+      width: 40px;
+      height: 32px;
+      margin: 2px;
+      font-size: 13px;
+      cursor: pointer;
+      border-radius: 6px;
+      border: 1px solid var(--border-soft);
+      background: #ffffff;
+      transition: transform 0.1s ease, box-shadow 0.1s ease;
+    }
+    .numero-btn:active {
+      transform: scale(0.96);
+      box-shadow: 0 0 0 rgba(0,0,0,0);
+    }
+    .numero-disponivel {
+      background-color: #e9ffe9;
+    }
+    .numero-reservado {
+      background-color: #ffe9c2;
+      cursor: not-allowed;
+    }
+    .numero-pago {
+      background-color: #ffcccc;
+      cursor: not-allowed;
+    }
+    .numero-selecionado {
+      border: 2px solid var(--gold);
+      font-weight: bold;
+      box-shadow: 0 0 4px rgba(212, 175, 55, 0.6);
+    }
+
+    form label {
+      font-size: 14px;
+      color: var(--text-main);
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border-soft);
+      font-size: 14px;
+      margin-top: 4px;
+    }
+    button[type="submit"] {
+      margin-top: 8px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      border: none;
+      background: var(--gold);
+      color: #ffffff;
+      font-weight: bold;
+      font-size: 14px;
+      cursor: pointer;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.12);
+    }
+    button[type="submit"]:hover {
+      filter: brightness(1.05);
+    }
+
+    #msg {
+      margin-top: 6px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    @media (max-width: 600px) {
+      .header {
+        flex-direction: row;
+        align-items: center;
+      }
+      .header-text h1 {
+        font-size: 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+
+    <div class="card">
+      <div class="header">
+        <!-- FOTO DE VOCÊS NO TOPO -->
+       <img src="img/noivos-casamento.png" alt="Bruna e Jhonatan" class="foto-noivos">
+ 
+        <div class="header-text">
+          <h1>Natal Premiado do Casamento Bruna &amp; Jhonatan</h1>
+          <p>Rifa especial para ajudar a realizar nosso sonho do casamento.</p>
+        </div>
+      </div>
+
+      <p class="highlight-quote">
+        “Com a sua contribuição, você faz parte dessa história de amor e ainda concorre a vários prêmios!”
+      </p>
+
+      <p class="info-line">💰 <strong>Valor do número:</strong> R$ 10,00</p>
+      <p class="info-line">📅 <strong>Data do sorteio:</strong> 22/12/2025</p>
+      <p class="info-line">🎁 <strong>Serão 4 ganhadores!</strong></p>
+    </div>
+
+    <div class="card">
+      <h2>Prêmios</h2>
+      <table>
+        <tr>
+          <th>Ordem do sorteio</th>
+          <th>Prêmio</th>
+        </tr>
+        <tr><td>1º número sorteado</td><td>Cesta de café da manhã</td></tr>
+        <tr><td>2º número sorteado</td><td>Jogo de facas</td></tr>
+        <tr><td>3º número sorteado</td><td>Panela de pressão</td></tr>
+        <tr><td>4º número sorteado</td><td>Body Pillow</td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>Como funciona</h2>
+      <ol>
+        <li>Abra o bloco de números desejado.</li>
+        <li>Clique nos números disponíveis que você quer reservar.</li>
+        <li>Preencha seus dados e envie o formulário.</li>
+        <li>Faça o PIX e envie o comprovante pelo WhatsApp.</li>
+      </ol>
+
+      <h3>Dados do PIX</h3>
+      <p class="info-line"><strong>Chave PIX (telefone):</strong> 11895346657</p>
+      <p class="info-line"><strong>Nome:</strong> Bruna Aparecida do Nascimento</p>
+      <p class="info-line"><strong>Valor:</strong> deixar em branco e digitar o valor manualmente.</p>
+
+      <h3>Envio do comprovante</h3>
+      <p class="info-line">
+        Após o pagamento, envie o comprovante para:<br>
+        📱 <strong>(35) 99187-9138</strong>
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>Escolha seus números</h2>
+      <p class="legenda">
+        <span><span class="legenda-box box-disponivel"></span>Disponível</span>
+        <span><span class="legenda-box box-reservado"></span>Reservado</span>
+        <span><span class="legenda-box box-pago"></span>Pago</span>
+      </p>
+
+      <div id="blocos-container">
+        Carregando números...
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Reserva dos números</h2>
+      <p class="info-line">Você também pode ajustar manualmente os números no campo abaixo, se quiser.</p>
+
+      <form id="form-rifa">
+        <label>Nome completo:<br>
+          <input type="text" id="nome" required></label><br><br>
+
+        <label>WhatsApp:<br>
+          <input type="text" id="whatsapp" placeholder="(DDD) 9XXXX-XXXX" required></label><br><br>
+
+        <label>Números escolhidos:<br>
+          <input type="text" id="numeros" placeholder="Ex: 1, 2, 3" required></label><br><br>
+
+        <label>Vendido por (revendedor):<br>
+          <input type="text" id="vendidoPor" placeholder="Ex: Ana / ANA01" required></label><br><br>
+
+        <button type="submit">Reservar meus números</button>
+      </form>
+
+      <p id="msg"></p>
+    </div>
+
+  </div>
+
+  <!-- Firebase v8 -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyA8yUZ2wN5Ad8ZSolOnGI2PIb_6j3Zsbh4",
+      authDomain: "acquashow-piscinas.firebaseapp.com",
+      projectId: "acquashow-piscinas",
+      storageBucket: "acquashow-piscinas.firebasestorage.app",
+      messagingSenderId: "823366312565",
+      appId: "1:823366312565:web:d75f19f4b8f186febd8e3c"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    const form = document.getElementById('form-rifa');
+    const msg = document.getElementById('msg');
+    const inputNumeros = document.getElementById('numeros');
+    const blocosContainer = document.getElementById('blocos-container');
+
+    const BLOCOS = [
+      { id: 'bloco1', titulo: 'Bloco 1 (1 – 100)', inicio: 1, fim: 100 },
+      { id: 'bloco2', titulo: 'Bloco 2 (101 – 200)', inicio: 101, fim: 200 },
+      { id: 'bloco3', titulo: 'Bloco 3 (201 – 300)', inicio: 201, fim: 300 }
+    ];
+
+    const selecionados = new Set();
+
+    function atualizarCampoNumeros() {
+      const lista = Array.from(selecionados).sort((a, b) => a - b);
+      inputNumeros.value = lista.join(', ');
+    }
+
+    function toggleNumero(num, botao) {
+      if (selecionados.has(num)) {
+        selecionados.delete(num);
+        botao.classList.remove('numero-selecionado');
+      } else {
+        selecionados.add(num);
+        botao.classList.add('numero-selecionado');
+      }
+      atualizarCampoNumeros();
+    }
+
+    function criarBlocoElemento(bloco, statusPorNumero) {
+      const divBloco = document.createElement('div');
+      divBloco.classList.add('bloco');
+
+      const header = document.createElement('div');
+      header.classList.add('bloco-header');
+      const titulo = document.createElement('span');
+      titulo.textContent = bloco.titulo;
+      const toggle = document.createElement('span');
+      toggle.classList.add('toggle');
+      toggle.textContent = '+';
+      header.appendChild(titulo);
+      header.appendChild(toggle);
+
+      const corpo = document.createElement('div');
+      corpo.classList.add('bloco-corpo');
+
+      for (let n = bloco.inicio; n <= bloco.fim; n++) {
+        const numStr = String(n);
+        const status = statusPorNumero[numStr];
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = numStr;
+        btn.classList.add('numero-btn');
+
+        if (status === 'pago') {
+          btn.classList.add('numero-pago');
+          btn.disabled = true;
+        } else if (status === 'reservado') {
+          btn.classList.add('numero-reservado');
+          btn.disabled = true;
+        } else {
+          btn.classList.add('numero-disponivel');
+          btn.addEventListener('click', () => toggleNumero(n, btn));
+        }
+
+        corpo.appendChild(btn);
+
+        if ((n - bloco.inicio + 1) % 10 === 0) {
+          corpo.appendChild(document.createElement('br'));
+        }
+      }
+
+      header.addEventListener('click', () => {
+        if (corpo.style.display === 'none' || corpo.style.display === '') {
+          corpo.style.display = 'block';
+          toggle.textContent = '−';
+        } else {
+          corpo.style.display = 'none';
+          toggle.textContent = '+';
+        }
+      });
+
+      divBloco.appendChild(header);
+      divBloco.appendChild(corpo);
+
+      return divBloco;
+    }
+
+    function montarBlocos(statusPorNumero) {
+      blocosContainer.innerHTML = '';
+      BLOCOS.forEach(bloco => {
+        const elemento = criarBlocoElemento(bloco, statusPorNumero);
+        blocosContainer.appendChild(elemento);
+      });
+    }
+
+    function carregarStatusNumeros() {
+      db.collection('rifaVendas').onSnapshot((snapshot) => {
+        const statusPorNumero = {};
+
+        snapshot.forEach((doc) => {
+          const dados = doc.data();
+          const status = (dados.status || 'reservado').toLowerCase();
+          const numerosStr = dados.numeros || '';
+
+          numerosStr.split(/[,;\/\s]+/).forEach((raw) => {
+            const num = raw.trim();
+            if (!num) return;
+            if (!statusPorNumero[num] || statusPorNumero[num] !== 'pago') {
+              statusPorNumero[num] = status;
+            }
+          });
+        });
+
+        montarBlocos(statusPorNumero);
+      }, (erro) => {
+        console.error(erro);
+        blocosContainer.innerText = 'Erro ao carregar números.';
+      });
+    }
+
+    carregarStatusNumeros();
+
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const nome = document.getElementById('nome').value;
+      const whatsapp = document.getElementById('whatsapp').value;
+      const numeros = inputNumeros.value;
+      const vendidoPor = document.getElementById('vendidoPor').value;
+
+      if (!numeros.trim()) {
+        alert('Escolha pelo menos um número.');
+        return;
+      }
+
+      msg.innerText = 'Enviando sua reserva...';
+
+      try {
+        const docRef = await db.collection("rifaVendas").add({
+          nome,
+          whatsapp,
+          numeros,
+          vendidoPor,
+          status: "reservado",
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        msg.innerText = "Reserva registrada! Agora faça o PIX e envie o comprovante pelo WhatsApp.";
+
+        const texto = encodeURIComponent(
+          `Olá, fiz a reserva da Rifa de Casamento Bruna & Jhonatan.\n\n` +
+          `Nome: ${nome}\n` +
+          `WhatsApp: ${whatsapp}\n` +
+          `Números: ${numeros}\n` +
+          `Vendido por: ${vendidoPor}\n` +
+          `ID da reserva: ${docRef.id}\n\n` +
+          `Vou enviar o comprovante agora.`
+        );
+
+        window.open(`https://wa.me/5535991879138?text=${texto}`, "_blank");
+
+        form.reset();
+        selecionados.clear();
+        atualizarCampoNumeros();
+
+      } catch (err) {
+        console.error(err);
+        msg.innerText = "Erro ao registrar. Tente novamente.";
+      }
+    });
+  </script>
+</body>
+</html>

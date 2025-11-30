@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin - Rifa de Casamento Bruna & Jhonatan</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --gold: #d4af37;
+      --gold-soft: #f5e6b3;
+      --bg-card: #ffffff;
+      --bg-page: #f7f7f7;
+      --text-main: #333333;
+      --text-muted: #666666;
+      --border-soft: #e0e0e0;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: var(--bg-page);
+      color: var(--text-main);
+      padding: 16px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .page {
+      max-width: 1000px;
+      width: 100%;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border-radius: 12px;
+      border: 1px solid var(--border-soft);
+      padding: 16px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+      margin-bottom: 16px;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-soft);
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+    }
+
+    .header-title {
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .header-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    #painel-status {
+      border-radius: 10px;
+      padding: 10px 14px;
+      background: linear-gradient(to right, #fff, var(--gold-soft));
+      border: 1px solid var(--border-soft);
+      font-size: 14px;
+      color: var(--text-main);
+      max-width: 320px;
+    }
+
+    #painel-status strong {
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    #painel-status span {
+      font-weight: bold;
+      color: var(--gold);
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 8px;
+      font-size: 13px;
+    }
+    th, td {
+      border: 1px solid var(--border-soft);
+      padding: 6px 8px;
+      text-align: left;
+    }
+    th {
+      background: #fafafa;
+    }
+
+    .status-pago {
+      color: green;
+      font-weight: bold;
+    }
+    .status-reservado {
+      color: #c27b00;
+      font-weight: bold;
+    }
+
+    button {
+      padding: 4px 8px;
+      font-size: 12px;
+      cursor: pointer;
+      border-radius: 999px;
+      border: none;
+      background: var(--gold);
+      color: #fff;
+    }
+    button + button {
+      margin-left: 4px;
+      background: #cccccc;
+      color: #333;
+    }
+
+    #msg {
+      margin-top: 8px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+
+    <div class="card">
+      <div class="header">
+        <div>
+          <div class="header-title">Painel da Rifa – Bruna &amp; Jhonatan</div>
+          <div class="header-sub">Visualização interna apenas (admin).</div>
+        </div>
+        <div id="painel-status">
+          <strong>Status geral da rifa:</strong>
+          Pagos: <span id="count-pagos">0</span><br>
+          Reservados: <span id="count-reservados">0</span><br>
+          Disponíveis: <span id="count-disponiveis">0</span>
+        </div>
+      </div>
+
+      <p class="header-sub">
+        Aqui você acompanha todas as reservas feitas pelo site, podendo confirmar pagamentos e ajustar o status.
+      </p>
+    </div>
+
+    <div class="card">
+      <table id="tabela-rifa">
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>WhatsApp</th>
+            <th>Números</th>
+            <th>Vendido por</th>
+            <th>Status</th>
+            <th>Data</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-rifa">
+          <tr><td colspan="7">Carregando reservas...</td></tr>
+        </tbody>
+      </table>
+
+      <p id="msg"></p>
+    </div>
+
+  </div>
+
+  <!-- Firebase v8 -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyA8yUZ2wN5Ad8ZSolOnGI2PIb_6j3Zsbh4",
+      authDomain: "acquashow-piscinas.firebaseapp.com",
+      projectId: "acquashow-piscinas",
+      storageBucket: "acquashow-piscinas.firebasestorage.app",
+      messagingSenderId: "823366312565",
+      appId: "1:823366312565:web:d75f19f4b8f186febd8e3c"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    const tbody = document.getElementById('tbody-rifa');
+    const msg = document.getElementById('msg');
+
+    const countPagos = document.getElementById('count-pagos');
+    const countReservados = document.getElementById('count-reservados');
+    const countDisponiveis = document.getElementById('count-disponiveis');
+
+    const TOTAL_NUMEROS = 300;
+
+    function formatarData(ts) {
+      if (!ts) return "-";
+      const d = ts.toDate();
+      const dia = String(d.getDate()).padStart(2, '0');
+      const mes = String(d.getMonth()+1).padStart(2, '0');
+      const ano = d.getFullYear();
+      const hora = String(d.getHours()).padStart(2, '0');
+      const min = String(d.getMinutes()).padStart(2, '0');
+      return `${dia}/${mes}/${ano} ${hora}:${min}`;
+    }
+
+    db.collection("rifaVendas").orderBy("createdAt", "desc")
+      .onSnapshot((snap) => {
+
+        tbody.innerHTML = "";
+
+        let pagos = 0;
+        let reservados = 0;
+        let usados = 0;
+
+        if (snap.empty) {
+          tbody.innerHTML = "<tr><td colspan='7'>Nenhuma reserva encontrada.</td></tr>";
+        }
+
+        snap.forEach((doc) => {
+          const d = doc.data();
+          const tr = document.createElement("tr");
+
+          const status = (d.status || "reservado").toLowerCase();
+          const numerosLimpos = (d.numeros || "").split(/[,;\s]+/).filter(x => x);
+          const qtdNums = numerosLimpos.length || 1;
+
+          if (status === "pago") pagos += qtdNums;
+          if (status === "reservado") reservados += qtdNums;
+
+          usados += qtdNums;
+
+          tr.innerHTML = `
+            <td>${d.nome || ""}</td>
+            <td>${d.whatsapp || ""}</td>
+            <td>${d.numeros || ""}</td>
+            <td>${d.vendidoPor || ""}</td>
+            <td class="${status === "pago" ? "status-pago" : "status-reservado"}">${status.toUpperCase()}</td>
+            <td>${formatarData(d.createdAt)}</td>
+            <td></td>
+          `;
+
+          const tdAcao = tr.querySelector("td:last-child");
+
+          const btnPago = document.createElement("button");
+          btnPago.textContent = "PAGO";
+          btnPago.onclick = async () => {
+            await db.collection("rifaVendas").doc(doc.id).update({ status: "pago" });
+            msg.innerText = `Reserva de "${d.nome}" marcada como PAGO.`;
+          };
+
+          const btnReservado = document.createElement("button");
+          btnReservado.textContent = "RESERVADO";
+          btnReservado.onclick = async () => {
+            await db.collection("rifaVendas").doc(doc.id).update({ status: "reservado" });
+            msg.innerText = `Reserva de "${d.nome}" marcada como RESERVADO.`;
+          };
+
+          tdAcao.appendChild(btnPago);
+          tdAcao.appendChild(btnReservado);
+
+          tbody.appendChild(tr);
+        });
+
+        countPagos.textContent = pagos;
+        countReservados.textContent = reservados;
+        countDisponiveis.textContent = Math.max(TOTAL_NUMEROS - usados, 0);
+      });
+  </script>
+</body>
+</html>
